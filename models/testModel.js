@@ -58,19 +58,19 @@ const updateHighestScore = async (testId) => {
 
 const updateQuestionById = (id, questionData) => {
     // --- MODIFICATION: Destructure 'imageUrl' from the incoming data ---
-    const { question_text, options, correct_option, image_url } = questionData;
+    const { question_text, options, correct_option, image_url, marks } = questionData;
 
     const optionsString = JSON.stringify(options);
 
     // --- MODIFICATION: Add 'image_url' to the SET clause ---
     const sql = `
         UPDATE questions 
-        SET question_text = $1, options = $2, correct_option = $3, image_url = $4
-        WHERE id = $5
+        SET question_text = $1, options = $2, correct_option = $3, image_url = $4, marks = $5
+        WHERE id = $6
     `;
 
     // --- MODIFICATION: Add 'imageUrl' to the parameters array ---
-    const params = [question_text, optionsString, correct_option, image_url, id];
+    const params = [question_text, optionsString, correct_option, image_url, marks, id];
 
     return new Promise((resolve, reject) => {
         db.query(sql, params, (err, result) => {
@@ -128,19 +128,19 @@ const create = async (testData) => {
 
 const addQuestion = async (questionData) => {
     // 1. Destructure 'imageUrl' from the incoming questionData object
-    const { test_id, question_text, options, correct_option, image_url } = questionData;
+    const { test_id, question_text, options, correct_option, image_url, marks } = questionData;
     const optionsString = JSON.stringify(options);
 
     // 2. Add the 'image_url' column to the SQL INSERT statement and a new placeholder ($5)
     const sql = `
-        INSERT INTO questions (test_id, question_text, options, correct_option, image_url) 
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO questions (test_id, question_text, options, correct_option, image_url,marks) 
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *;
     `;
 
     // 3. Add the 'imageUrl' variable to the parameters array.
     //    Using '|| null' is a safeguard to insert NULL if imageUrl is undefined or an empty string.
-    const params = [test_id, question_text, optionsString, correct_option, image_url || null];
+    const params = [test_id, question_text, optionsString, correct_option, image_url, marks || null];
 
     // Execute the query with the new parameters
     const { rows } = await db.query(sql, params);
